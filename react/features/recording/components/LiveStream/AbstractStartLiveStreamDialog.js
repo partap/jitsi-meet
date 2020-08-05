@@ -32,6 +32,11 @@ export type Props = {
     _googleProfileEmail: string,
 
     /**
+     * The live stream url that was used before.
+     */
+    _streamUrl: string,
+
+    /**
      * The live stream key that was used before.
      */
     _streamKey: string,
@@ -71,6 +76,10 @@ export type State = {
      */
     selectedBoundStreamID: ?string,
 
+    /**
+     * The selected or entered stream base URL to use for Generic live streaming.
+     */
+    streamUrl: string
     /**
      * The selected or entered stream key to use for YouTube live streaming.
      */
