@@ -13,6 +13,8 @@ STYLES_MAIN = css/main.scss
 WEBPACK = ./node_modules/.bin/webpack
 WEBPACK_DEV_SERVER = ./node_modules/.bin/webpack-dev-server
 
+export WEBPACK_DEV_SERVER_PROXY_TARGET=https://beach.mediacast.us
+
 all: compile deploy clean
 
 compile:
