@@ -1,6 +1,9 @@
 // @flow
 
+import { Checkbox } from '@atlaskit/checkbox';
+import { FieldTextStateless } from '@atlaskit/field-text';
 import Spinner from '@atlaskit/spinner';
+import Tabs, { TabContent, TabItem } from '@atlaskit/tabs';
 import React from 'react';
 
 import { Dialog } from '../../../../base/dialog';
@@ -42,6 +45,8 @@ type Props = AbstractProps & {
 class StartLiveStreamDialog
     extends AbstractStartLiveStreamDialog<Props> {
 
+    _tabs: Object[]
+
     /**
      * Initializes a new {@code StartLiveStreamDialog} instance.
      *
@@ -58,6 +63,20 @@ class StartLiveStreamDialog
         this._onRequestGoogleSignIn = this._onRequestGoogleSignIn.bind(this);
         this._onYouTubeBroadcastIDSelected
             = this._onYouTubeBroadcastIDSelected.bind(this);
+        this._tabs = [
+            {
+                label: 'YouTube',
+                content: 'YouTube'
+            },
+            {
+                label: 'MediaCAST',
+                content: 'MediaCAST'
+            },
+            {
+                label: 'Other RTMP',
+                content: 'Generic'
+            }
+        ];
     }
 
     /**
@@ -75,13 +94,17 @@ class StartLiveStreamDialog
         }
     }
 
+
     /**
      * Implements {@code Component}'s render.
      *
      * @inheritdoc
      */
     render() {
-        const { _googleApiApplicationClientID } = this.props;
+        // const { _googleApiApplicationClientID, t } = this.props;
+        this._tabs[0].content = this._renderYouTubeTab();
+        this._tabs[1].content = this._renderMediacastTab();
+        this._tabs[2].content = this._renderGenericTab();
 
         return (
             <Dialog
@@ -92,15 +115,154 @@ class StartLiveStreamDialog
                 titleKey = 'liveStreaming.start'
                 width = { 'small' }>
                 <div className = 'live-stream-dialog'>
-                    { _googleApiApplicationClientID
-                        ? this._renderYouTubePanel() : null }
-                    <StreamKeyForm
-                        onChange = { this._onStreamKeyChange }
-                        value = {
-                            this.state.streamKey || this.props._streamKey
-                        } />
+                    <Tabs
+                        onSelect = { (_tab, index) => console.log('Selected tab', index + 1) }
+                        tabs = { this._tabs } />
+
                 </div>
             </Dialog>
+        );
+    }
+
+    /**
+     * Loads tab for streaming to YouTube.
+     *
+     * @private
+     * @returns {ReactElement}
+     */
+    _renderYouTubeTab() {
+        const { _googleApiApplicationClientID } = this.props;
+
+        return (
+            <div style = {{ width: '100%' }}>
+                { _googleApiApplicationClientID
+                    ? this._renderYouTubePanel() : null }
+                <StreamKeyForm
+                    onChange = { this._onStreamKeyChange }
+                    value = {
+                        this.state.streamKey || this.props._streamKey
+                    } />
+            </div>
+        );
+    }
+
+    /**
+     * Loads tab for streaming to generic RTMP server.
+     *
+     * @private
+     * @returns {ReactElement}
+     */
+    _renderMediacastTab() {
+        const { t } = this.props;
+
+        return (
+            <div style = {{ width: '100%' }}>
+                <div style = {{ marginBottom: '1em' }} >
+                    <FieldTextStateless
+                        compact = { true }
+                        isSpellCheckEnabled = { false }
+                        label = { t('dialog.streamKey') }
+                        name = 'streamId'
+                        onChange = { this._onStreamKeyChange }
+                        placeholder = { t('liveStreaming.enterStreamKey') }
+                        shouldFitContainer = { true }
+                        type = 'text'
+                        value = { this.state.streamKey || this.props._streamKey } />
+                </div>
+                <Checkbox
+                    isChecked = { this.state.requireAuth }
+                    label = 'Use authentication'
+                    onChange = { this._onRequireAuthChange } />
+                { this.state.requireAuth
+                    ? <div>
+                        <FieldTextStateless
+                            compact = { true }
+                            isSpellCheckEnabled = { false }
+                            label = 'Username'
+                            name = 'stream-username'
+                            onChange = { this._onUsernameChange }
+                            placeholder = { 'Enter Username' }
+                            shouldFitContainer = { true }
+                            type = 'text'
+                            value = { this.state.username || this.props._username } />
+                        <FieldTextStateless
+                            compact = { true }
+                            isSpellCheckEnabled = { false }
+                            label = 'Password'
+                            name = 'stream-password'
+                            onChange = { this._onPasswordChange }
+                            shouldFitContainer = { true }
+                            type = 'password'
+                            value = { this.state.password || this.props._password } />
+                    </div> : null
+                }
+            </div>
+        );
+    }
+
+    /**
+     * Loads tab for streaming to generic RTMP server.
+     *
+     * @private
+     * @returns {ReactElement}
+     */
+    _renderGenericTab() {
+        const { t } = this.props;
+
+        return (
+            <div style = {{ width: '100%' }}>
+                <div style = {{ marginBottom: '1em' }} >
+                    <FieldTextStateless
+                        compact = { true }
+                        isSpellCheckEnabled = { false }
+                        label = { t('dialog.streamUrl') }
+                        name = 'streamUrl'
+                        onChange = { this._onStreamUrlChange }
+                        placeholder = { t('liveStreaming.enterStreamUrl') }
+                        shouldFitContainer = { true }
+                        type = 'text'
+                        value = { this.state.streamUrl || this.props._streamUrl } />
+
+                    <FieldTextStateless
+                        compact = { true }
+                        isSpellCheckEnabled = { false }
+                        label = { t('dialog.streamKey') }
+                        name = 'streamId'
+                        onChange = { this._onStreamKeyChange }
+                        placeholder = { t('liveStreaming.enterStreamKey') }
+                        shouldFitContainer = { true }
+                        type = 'text'
+                        value = { this.state.streamKey || this.props._streamKey } />
+                </div>
+                <Checkbox
+                    isChecked = { this.state.requireAuth }
+                    label = 'Use authentication'
+                    onChange = { this._onRequireAuthChange } />
+                { this.state.requireAuth
+                    ? <div>
+                        <FieldTextStateless
+                            compact = { true }
+                            isSpellCheckEnabled = { false }
+                            label = 'Username'
+                            name = 'stream-username'
+                            onChange = { this._onUsernameChange }
+                            placeholder = { 'Enter Username' }
+                            shouldFitContainer = { true }
+                            type = 'text'
+                            value = { this.state.username || this.props._username } />
+                        <FieldTextStateless
+                            compact = { true }
+                            isSpellCheckEnabled = { false }
+                            label = 'Password'
+                            name = 'stream-password'
+                            onChange = { this._onPasswordChange }
+                            shouldFitContainer = { true }
+                            type = 'password'
+                            value = { this.state.password || this.props._password } />
+                    </div> : null
+                }
+
+            </div>
         );
     }
 
@@ -201,6 +363,11 @@ class StartLiveStreamDialog
     }
 
     _onStreamKeyChange: string => void;
+
+    _onStreamUrlChange: string => void;
+    _onUsernameChange: string => void;
+    _onPasswordChange: string => void;
+    _onRequireAuthChange: boolean => void;
 
     _onYouTubeBroadcastIDSelected: (string) => Object;
 

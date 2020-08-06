@@ -40,6 +40,9 @@ export type Props = {
      * The live stream key that was used before.
      */
     _streamKey: string,
+    _username: string,
+    _password: string,
+    _requireAuth: boolean,
 
     /**
      * The Redux dispatch function.
@@ -79,11 +82,15 @@ export type State = {
     /**
      * The selected or entered stream base URL to use for Generic live streaming.
      */
-    streamUrl: string
+    streamUrl: string,
+
     /**
      * The selected or entered stream key to use for YouTube live streaming.
      */
-    streamKey: string
+    streamKey: string,
+    username: string,
+    password: string,
+    requireAuth: boolean
 };
 
 /**
@@ -109,7 +116,10 @@ export default class AbstractStartLiveStreamDialog<P: Props>
             broadcasts: undefined,
             errorType: undefined,
             selectedBoundStreamID: undefined,
-            streamKey: ''
+            streamKey: '',
+            streamUrl: '',
+            username: '',
+            password: ''
         };
 
         /**
@@ -124,6 +134,10 @@ export default class AbstractStartLiveStreamDialog<P: Props>
 
         this._onCancel = this._onCancel.bind(this);
         this._onStreamKeyChange = this._onStreamKeyChange.bind(this);
+        this._onStreamUrlChange = this._onStreamUrlChange.bind(this);
+        this._onUsernameChange = this._onUsernameChange.bind(this);
+        this._onPasswordChange = this._onPasswordChange.bind(this);
+        this._onRequireAuthChange = this._onRequireAuthChange.bind(this);
         this._onSubmit = this._onSubmit.bind(this);
     }
 
@@ -180,13 +194,91 @@ export default class AbstractStartLiveStreamDialog<P: Props>
      * Callback invoked to update the {@code StartLiveStreamDialog} component's
      * display of the entered YouTube stream key.
      *
-     * @param {string} streamKey - The stream key entered in the field.
+     * @param {string} urlOrObject - The stream key entered in the field.
      * @private
      * @returns {void}
      */
-    _onStreamKeyChange(streamKey) {
+    _onStreamKeyChange(urlOrObject) {
+        const streamKey = typeof urlOrObject === 'object' ? urlOrObject.target.value : urlOrObject;
+
         this._setStateIfMounted({
             streamKey,
+            selectedBoundStreamID: undefined
+        });
+    }
+
+    _onStreamUrlChange: Object => void;
+
+    /**
+     * Callback invoked to update the {@code StartLiveStreamDialog} component's
+     * display of the entered stream server URL.
+     *
+     * @param {string} urlOrObject - The stream URL entered in the field.
+     * @private
+     * @returns {void}
+     */
+    _onStreamUrlChange(urlOrObject) {
+        const streamUrl = typeof urlOrObject === 'object' ? urlOrObject.target.value : urlOrObject;
+
+        this._setStateIfMounted({
+            streamUrl,
+            selectedBoundStreamID: undefined
+        });
+    }
+
+    _onUsernameChange: Object => void;
+
+    /**
+     * Callback invoked to update the {@code StartLiveStreamDialog} component's
+     * display of the entered stream server username.
+     *
+     * @param {string} urlOrObject - The stream username entered in the field.
+     * @private
+     * @returns {void}
+     */
+    _onUsernameChange(urlOrObject) {
+        const username = typeof urlOrObject === 'object' ? urlOrObject.target.value : urlOrObject;
+
+        this._setStateIfMounted({
+            username,
+            selectedBoundStreamID: undefined
+        });
+    }
+
+    _onPasswordChange: Object => void;
+
+    /**
+     * Callback invoked to update the {@code StartLiveStreamDialog} component's
+     * display of the entered stream server password.
+     *
+     * @param {string} urlOrObject - The stream password entered in the field.
+     * @private
+     * @returns {void}
+     */
+    _onPasswordChange(urlOrObject) {
+        const password = typeof urlOrObject === 'object' ? urlOrObject.target.value : urlOrObject;
+
+        this._setStateIfMounted({
+            password,
+            selectedBoundStreamID: undefined
+        });
+    }
+
+    _onRequireAuthChange: Object => void;
+
+    /**
+     * Callback invoked to update the {@code StartLiveStreamDialog} component's
+     * display of the auth section.
+     *
+     * @param {Object|boolean} valOrObject - The new value of requireAuth.
+     * @private
+     * @returns {void}
+     */
+    _onRequireAuthChange(valOrObject) {
+        const requireAuth = typeof valOrObject === 'object' ? valOrObject.target.checked : valOrObject;
+
+        this._setStateIfMounted({
+            requireAuth,
             selectedBoundStreamID: undefined
         });
     }
@@ -205,6 +297,8 @@ export default class AbstractStartLiveStreamDialog<P: Props>
         const { broadcasts, selectedBoundStreamID } = this.state;
         const key
             = (this.state.streamKey || this.props._streamKey || '').trim();
+        const url
+            = (this.state.streamUrl || this.props._streamUrl || '').trim();
 
         if (!key) {
             return false;
@@ -225,7 +319,10 @@ export default class AbstractStartLiveStreamDialog<P: Props>
         this.props._conference.startRecording({
             broadcastId: selectedBroadcastID,
             mode: JitsiRecordingConstants.mode.STREAM,
-            streamId: key
+            streamId: key,
+            streamUrl: url,
+            username: 'partap',
+            password: 'partap'
         });
 
         return true;
