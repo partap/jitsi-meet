@@ -42,7 +42,7 @@ export type Props = {
     _streamKey: string,
     _username: string,
     _password: string,
-    _requireAuth: boolean,
+    _authRequired: boolean,
 
     /**
      * The Redux dispatch function.
@@ -90,7 +90,7 @@ export type State = {
     streamKey: string,
     username: string,
     password: string,
-    requireAuth: boolean
+    authRequired: boolean
 };
 
 /**
@@ -119,7 +119,8 @@ export default class AbstractStartLiveStreamDialog<P: Props>
             streamKey: '',
             streamUrl: '',
             username: '',
-            password: ''
+            password: '',
+            authRequired: false
         };
 
         /**
@@ -137,7 +138,7 @@ export default class AbstractStartLiveStreamDialog<P: Props>
         this._onStreamUrlChange = this._onStreamUrlChange.bind(this);
         this._onUsernameChange = this._onUsernameChange.bind(this);
         this._onPasswordChange = this._onPasswordChange.bind(this);
-        this._onRequireAuthChange = this._onRequireAuthChange.bind(this);
+        this._onAuthRequiredChange = this._onAuthRequiredChange.bind(this);
         this._onSubmit = this._onSubmit.bind(this);
     }
 
@@ -264,21 +265,21 @@ export default class AbstractStartLiveStreamDialog<P: Props>
         });
     }
 
-    _onRequireAuthChange: Object => void;
+    _onAuthRequiredChange: Object => void;
 
     /**
      * Callback invoked to update the {@code StartLiveStreamDialog} component's
      * display of the auth section.
      *
-     * @param {Object|boolean} valOrObject - The new value of requireAuth.
+     * @param {Object|boolean} valOrObject - The new value of authRequired.
      * @private
      * @returns {void}
      */
-    _onRequireAuthChange(valOrObject) {
-        const requireAuth = typeof valOrObject === 'object' ? valOrObject.target.checked : valOrObject;
+    _onAuthRequiredChange(valOrObject) {
+        const authRequired = typeof valOrObject === 'object' ? valOrObject.target.checked : valOrObject;
 
         this._setStateIfMounted({
-            requireAuth,
+            authRequired,
             selectedBoundStreamID: undefined
         });
     }
@@ -299,6 +300,10 @@ export default class AbstractStartLiveStreamDialog<P: Props>
             = (this.state.streamKey || this.props._streamKey || '').trim();
         const url
             = (this.state.streamUrl || this.props._streamUrl || '').trim();
+        const username
+            = (this.state.username || this.props._username || '').trim();
+        const password
+            = (this.state.password || this.props._password || '').trim();
 
         if (!key) {
             return false;
@@ -321,8 +326,8 @@ export default class AbstractStartLiveStreamDialog<P: Props>
             mode: JitsiRecordingConstants.mode.STREAM,
             streamId: key,
             streamUrl: url,
-            username: 'partap',
-            password: 'partap'
+            username,
+            password
         });
 
         return true;

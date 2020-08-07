@@ -407,6 +407,7 @@
         "choose": "Choose a live stream",
         "chooseCTA": "Choose a streaming option. You're currently logged in as {{email}}.",
         "enterStreamKey": "Enter your YouTube live stream key here.",
+        "enterStreamId": "Enter your stream ID here.",
         "enterStreamUrl": "rtmp://a.rtmp.youtube.com/live2",
         "error": "Live Streaming failed. Please try again.",
         "errorAPI": "An error occurred while accessing your YouTube broadcasts. Please try logging in again.",

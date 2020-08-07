@@ -114,4 +114,12 @@
         color:#FFD740;
         font-size: 12px;
     }
+
+    /* don't know why we need this, but if not, the divs are only half-width */
+    div {
+        width: 100%;
+    }
+    .section-spacer {
+        margin-top: 1.75em;
+    }
 }
