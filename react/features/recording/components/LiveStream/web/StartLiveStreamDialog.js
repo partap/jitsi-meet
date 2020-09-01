@@ -1,4 +1,5 @@
 // @flow
+/* global config */
 
 import { Checkbox } from '@atlaskit/checkbox';
 import { FieldTextStateless } from '@atlaskit/field-text';
@@ -64,22 +65,20 @@ class StartLiveStreamDialog
         this._onRequestGoogleSignIn = this._onRequestGoogleSignIn.bind(this);
         this._onYouTubeBroadcastIDSelected
             = this._onYouTubeBroadcastIDSelected.bind(this);
+
+
         this._onSelectTab = this._onSelectTab.bind(this);
-        this._tabs = [
-            {
-                label: 'YouTube',
-                content: 'YouTube'
-            },
-            {
-                label: 'MediaCAST',
-                content: 'MediaCAST'
-            },
-            {
-                label: 'Other RTMP',
-                content: 'Generic'
-            }
-        ];
-        this._currentTab = JSON.parse(window.localStorage.getItem('recorder/currentTab') || "0");
+        this._tabs = [ { name: 'youtube' } ];
+
+        console.debug('config.streamingServers:', config.streamingServers);
+        if (config.streamingServers && config.streamingServers.length) {
+            const customTabs = config.streamingServers.map(serverConfig => {
+                return { label: serverConfig.label || serverConfig.name };
+            });
+
+            this._tabs = customTabs;
+        }
+        this._currentTab = JSON.parse(window.localStorage.getItem('recorder/currentTab') || '0');
 
     }
 
@@ -105,9 +104,19 @@ class StartLiveStreamDialog
      * @inheritdoc
      */
     render() {
-        this._tabs[0].content = this._renderYouTubeTab();
-        this._tabs[1].content = this._renderMediacastTab();
-        this._tabs[2].content = this._renderGenericTab();
+        // this._tabs[0].content = this._renderYouTubeTab();
+
+        let i = 0;
+
+        if (config.streamingServers && config.streamingServers.length) {
+            for (const serverConfig of config.streamingServers) {
+                this._tabs[i++].content = serverConfig.name === 'youtube'
+                    ? this._renderYouTubeTab()
+                    : this._renderCustomTab(serverConfig);
+            }
+        }
+
+        // this._tabs[i].content = this._renderCustomTab();
 
         return (
             <Dialog
@@ -145,10 +154,6 @@ class StartLiveStreamDialog
         }
     }
 
-    _saveTabState(state) {
-
-    }
-
     /**
      * Loads tab for streaming to YouTube.
      *
@@ -172,72 +177,29 @@ class StartLiveStreamDialog
     }
 
     /**
-     * Loads tab for streaming to generic RTMP server.
+     * Loads tab for streaming to custom RTMP server.
      *
      * @private
+     * @param {Object} serverConfig - Configuration for custom RTMP server.
+     * @example
+     * ```
+     * {
+     *     name: 'facebook',
+     *     label: 'Facebook Live', // optional
+     *     url: 'rtmps://live-api-s.facebook.com:443/rtmp/', // optional
+     *     useAuth: false // optional
+     * }
+     * ```
      * @returns {ReactElement}
      */
-    _renderMediacastTab() {
+    _renderCustomTab(serverConfig = {}) {
         const { t } = this.props;
 
         return (
             <div>
                 <FieldTextStateless
                     compact = { true }
-                    isSpellCheckEnabled = { false }
-                    label = { t('dialog.streamKey') }
-                    name = 'streamId'
-                    onChange = { this._onStreamKeyChange }
-                    placeholder = { t('liveStreaming.enterStreamId') }
-                    shouldFitContainer = { true }
-                    type = 'text'
-                    value = { this.state.streamKey || this.props._streamKey } />
-                <Checkbox
-                    className = 'section-spacer'
-                    isChecked = { this.state.authRequired }
-                    label = 'Use authentication'
-                    onChange = { this._onAuthRequiredChange } />
-                { this.state.authRequired
-                    ? <div>
-                        <FieldTextStateless
-                            compact = { true }
-                            isSpellCheckEnabled = { false }
-                            label = 'Username'
-                            name = 'stream-username'
-                            onChange = { this._onUsernameChange }
-                            placeholder = { 'Streaming server username' }
-                            shouldFitContainer = { true }
-                            type = 'text'
-                            value = { this.state.username || this.props._username } />
-                        <FieldTextStateless
-                            compact = { true }
-                            isSpellCheckEnabled = { false }
-                            label = 'Password'
-                            name = 'stream-password'
-                            onChange = { this._onPasswordChange }
-                            placeholder = { 'Streaming server password' }
-                            shouldFitContainer = { true }
-                            type = 'password'
-                            value = { this.state.password || this.props._password } />
-                    </div> : null
-                }
-            </div>
-        );
-    }
-
-    /**
-     * Loads tab for streaming to generic RTMP server.
-     *
-     * @private
-     * @returns {ReactElement}
-     */
-    _renderGenericTab() {
-        const { t } = this.props;
-
-        return (
-            <div>
-                <FieldTextStateless
-                    compact = { true }
+                    disabled = { serverConfig.url && serverConfig.url.length }
                     isSpellCheckEnabled = { false }
                     label = { t('dialog.streamUrl') }
                     name = 'streamUrl'
@@ -245,7 +207,7 @@ class StartLiveStreamDialog
                     placeholder = { t('liveStreaming.enterStreamUrl') }
                     shouldFitContainer = { true }
                     type = 'text'
-                    value = { this.state.streamUrl || this.props._streamUrl } />
+                    value = { serverConfig.url || this.state.streamUrl || this.props._streamUrl } />
 
                 <FieldTextStateless
                     compact = { true }
@@ -257,36 +219,39 @@ class StartLiveStreamDialog
                     shouldFitContainer = { true }
                     type = 'text'
                     value = { this.state.streamKey || this.props._streamKey } />
-                <Checkbox
-                    className = 'section-spacer'
-                    isChecked = { this.state.authRequired }
-                    label = 'Use authentication'
-                    onChange = { this._onAuthRequiredChange } />
-                { this.state.authRequired
-                    ? <div>
-                        <FieldTextStateless
-                            compact = { true }
-                            isSpellCheckEnabled = { false }
-                            label = 'Username'
-                            name = 'stream-username'
-                            onChange = { this._onUsernameChange }
-                            placeholder = { 'Streaming server username' }
-                            shouldFitContainer = { true }
-                            type = 'text'
-                            value = { this.state.username || this.props._username } />
-                        <FieldTextStateless
-                            compact = { true }
-                            isSpellCheckEnabled = { false }
-                            label = 'Password'
-                            name = 'stream-password'
-                            onChange = { this._onPasswordChange }
-                            placeholder = { 'Streaming server password' }
-                            shouldFitContainer = { true }
-                            type = 'password'
-                            value = { this.state.password || this.props._password } />
+                { serverConfig.useAuth
+                    ? <div className = 'section-spacer'>
+
+                        <Checkbox
+                            isChecked = { this.state.authRequired }
+                            label = 'Use authentication'
+                            onChange = { this._onAuthRequiredChange } />
+                        { this.state.authRequired
+                            ? <div>
+                                <FieldTextStateless
+                                    compact = { true }
+                                    isSpellCheckEnabled = { false }
+                                    label = 'Username'
+                                    name = 'stream-username'
+                                    onChange = { this._onUsernameChange }
+                                    placeholder = { 'Streaming server username' }
+                                    shouldFitContainer = { true }
+                                    type = 'text'
+                                    value = { this.state.username || this.props._username } />
+                                <FieldTextStateless
+                                    compact = { true }
+                                    isSpellCheckEnabled = { false }
+                                    label = 'Password'
+                                    name = 'stream-password'
+                                    onChange = { this._onPasswordChange }
+                                    placeholder = { 'Streaming server password' }
+                                    shouldFitContainer = { true }
+                                    type = 'password'
+                                    value = { this.state.password || this.props._password } />
+                            </div> : null
+                        }
                     </div> : null
                 }
-
             </div>
         );
     }
