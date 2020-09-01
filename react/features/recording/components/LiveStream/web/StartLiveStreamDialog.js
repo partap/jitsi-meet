@@ -78,8 +78,15 @@ class StartLiveStreamDialog
 
             this._tabs = customTabs;
         }
-        this._currentTab = JSON.parse(window.localStorage.getItem('recorder/currentTab') || '0');
+        const tabIndex = JSON.parse(window.localStorage.getItem('recorder/currentTab') || '0');
 
+        this._currentTab = tabIndex;
+        const streamUrl = config.streamingServers[tabIndex]
+            ? config.streamingServers[tabIndex].url
+            : '';
+
+        this.state.streamUrl = streamUrl;
+        this.state.selectedBoundStreamID = undefined;
     }
 
     /**
@@ -147,10 +154,21 @@ class StartLiveStreamDialog
      * @returns {void}
      */
     _onSelectTab(_tab, index) {
-        console.log('Selected tab', index + 1);
+        console.debug('Selected tab', index + 1);
         if (typeof index !== 'undefined') {
             window.localStorage.setItem('recorder/currentTab', JSON.stringify(index));
             this._currentTab = index;
+
+            const streamUrl = config.streamingServers[index]
+                ? config.streamingServers[index].url
+                : '';
+
+            console.debug('setting streamUrl:', streamUrl);
+
+            this.setState({
+                streamUrl,
+                selectedBoundStreamID: undefined
+            });
         }
     }
 

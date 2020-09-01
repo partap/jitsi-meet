@@ -325,9 +325,9 @@ export default class AbstractStartLiveStreamDialog<P: Props>
             broadcastId: selectedBroadcastID,
             mode: JitsiRecordingConstants.mode.STREAM,
             streamId: key,
-            streamUrl: url,
-            username,
-            password
+            streamUrl: url ? url : undefined,
+            username: username ? username : undefined,
+            password: password ? password : undefined
         });
 
         return true;
